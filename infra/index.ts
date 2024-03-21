@@ -1,23 +1,29 @@
-import * as pulumi from "@pulumi/pulumi";
+import { web } from "@pulumi/azure-native";
 import * as resources from "@pulumi/azure-native/resources";
-import * as storage from "@pulumi/azure-native/storage";
+
+const LOCATION = "swedencentral";
 
 // Create an Azure Resource Group
-const resourceGroup = new resources.ResourceGroup("resourceGroup");
+const resourceGroup = new resources.ResourceGroup(
+	"petter-managed-identity-rg",
+	{
+		location: LOCATION,
+	}
+);
 
-// Create an Azure resource (Storage Account)
-const storageAccount = new storage.StorageAccount("sa", {
-    resourceGroupName: resourceGroup.name,
-    sku: {
-        name: storage.SkuName.Standard_LRS,
-    },
-    kind: storage.Kind.StorageV2,
+// Create app service plan
+const appServicePlan = new web.AppServicePlan("petter-managed-identity-asp", {
+	resourceGroupName: resourceGroup.name,
+	location: LOCATION,
+	sku: {
+		name: "S1",
+		tier: "Standard",
+	},
 });
 
-// Export the primary key of the Storage Account
-const storageAccountKeys = storage.listStorageAccountKeysOutput({
-    resourceGroupName: resourceGroup.name,
-    accountName: storageAccount.name
+// Create web app
+const app = new web.WebApp("petter-managed-identity-app", {
+	resourceGroupName: resourceGroup.name,
+	serverFarmId: appServicePlan.id,
+	location: LOCATION,
 });
-
-export const primaryStorageKey = storageAccountKeys.keys[0].value;
