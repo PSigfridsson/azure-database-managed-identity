@@ -1,28 +1,60 @@
-import mysql, { RowDataPacket } from "mysql2/promise";
-import fs from "fs";
-import path from "path";
+import { Connection, Request } from "tedious";
 
 async function getDatabaseVersionInternal(): Promise<string> {
-	const connection = await mysql.createConnection({
-		host: process.env.DB_HOST,
-		user: process.env.DB_USER,
-		password: process.env.DB_PASSWORD,
-		database: process.env.DB_NAME,
-		ssl: {
-			ca: fs.readFileSync(
-				path.join(process.cwd(), "DigiCertGlobalRootCA.crt.pem"),
-				"binary"
-			),
-		},
+	return new Promise((resolve, reject) => {
+		const config = {
+			server: process.env.DB_HOST,
+			authentication: {
+				type: "default",
+				options: {
+					userName: process.env.DB_USER,
+					password: process.env.DB_PASSWORD,
+				},
+			},
+			options: {
+				database: process.env.DB_NAME,
+				encrypt: true, // Azure SQL always requires encryption
+				trustServerCertificate: true, // Trust the server certificate (change if you have a specific cert)
+			},
+		};
+
+		const connection = new Connection(config);
+
+		connection.on("connect", (err) => {
+			if (err) {
+				console.error("Connection Failed", err);
+				reject(err);
+			} else {
+				console.log("Connected successfully to Azure SQL");
+				executeStatement();
+			}
+		});
+
+		function executeStatement() {
+			const request = new Request(
+				"SELECT @@VERSION AS 'version'",
+				(err, rowCount, rows) => {
+					if (err) {
+						console.error(err);
+						reject(err);
+					} else {
+						if (rowCount > 0) {
+							console.log("Version:", rows[0][0].value);
+							resolve(rows[0][0].value);
+						} else {
+							resolve("N/A");
+						}
+					}
+
+					connection.close();
+				}
+			);
+
+			connection.execSql(request);
+		}
+
+		connection.connect();
 	});
-
-	const [rows] = await connection.execute("SELECT VERSION()");
-	console.log(rows);
-	await connection.end();
-	const result = rows as RowDataPacket[];
-	console.log("Result: ", result);
-
-	return result[0]["VERSION()"] ?? "N/A";
 }
 
 async function getDatabaseVersion(): Promise<string> {

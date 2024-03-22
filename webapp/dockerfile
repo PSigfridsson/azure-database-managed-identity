@@ -4,11 +4,14 @@ FROM node:21.5
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the application files to the container
-COPY /hello-world .
+# Copy the package.json and package-lock.json files
+COPY package.json package-lock.json ./
 
 # Install dependencies
 RUN npm install
+
+# Copy the rest of the application
+COPY . .
 
 # Accept IMAGE_TAG as a build argument
 ARG IMAGE_TAG
@@ -19,8 +22,10 @@ ENV NEXT_PUBLIC_IMAGE_TAG=$IMAGE_TAG
 # Build the application
 RUN npm run build
 
+ENV PORT=80
+
 # Set the command to run the application
 CMD npm run start
 
-# Expose port 3000
-EXPOSE 3000
+# Expose port 80
+EXPOSE 80
