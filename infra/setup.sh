@@ -1,0 +1,2 @@
+# Replace all values
+export DOCKER_REGISTRY_SERVER_PASSWORD=<REPLACE-VALUE>

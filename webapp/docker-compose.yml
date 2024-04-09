@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+    webapp:
+        build: .
+        ports:
+            - "80:80"
+        environment:
+            DB_HOST: "foo-server.database.windows.net"
+            DB_USER: "CloudSAea146cfb"
+            DB_PASSWORD: "!abctestBlikk123"
+            DB_NAME: "bar-database"

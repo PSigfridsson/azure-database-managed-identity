@@ -1,15 +1,27 @@
-import { Connection, Request } from "tedious";
+import { Connection, ConnectionConfiguration, Request } from "tedious";
 
 async function getDatabaseVersionInternal(): Promise<string> {
 	return new Promise((resolve, reject) => {
-		const config = {
+		if (
+			!process.env.DB_HOST ||
+			!process.env.DB_USER ||
+			!process.env.DB_PASSWORD ||
+			!process.env.DB_NAME
+		) {
+			console.error("Database connection information missing");
+			resolve("N/A");
+			return;
+		}
+
+		const config: ConnectionConfiguration = {
 			server: process.env.DB_HOST,
 			authentication: {
-				type: "default",
-				options: {
-					userName: process.env.DB_USER,
-					password: process.env.DB_PASSWORD,
-				},
+				type: "azure-active-directory-msi-app-service",
+				// type: "default", // azure-active-directory-msi-app-service
+				// options: {
+				// 	userName: process.env.DB_USER,
+				// 	password: process.env.DB_PASSWORD,
+				// },
 			},
 			options: {
 				database: process.env.DB_NAME,
@@ -32,18 +44,13 @@ async function getDatabaseVersionInternal(): Promise<string> {
 
 		function executeStatement() {
 			const request = new Request(
-				"SELECT @@VERSION AS 'version'",
+				"SELECT * FROM BlikkTest.test",
 				(err, rowCount, rows) => {
 					if (err) {
-						console.error(err);
-						reject(err);
+						console.error("Error executing query:", err);
+						reject("Error executing query");
 					} else {
-						if (rowCount > 0) {
-							console.log("Version:", rows[0][0].value);
-							resolve(rows[0][0].value);
-						} else {
-							resolve("N/A");
-						}
+						resolve(`Database Rows: ${rowCount}`);
 					}
 
 					connection.close();

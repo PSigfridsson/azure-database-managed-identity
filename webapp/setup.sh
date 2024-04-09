@@ -7,13 +7,13 @@ CURRENT_TIMESTAMP=$(date '+%Y%m%d-%H%M%S')
 ############################################
 # EXPORTED ENVIRONMENT VARIABLES
 ############################################
-export CONTAINER_REGISTRY_NAME=
-export CONTAINER_REGISTRY_URL=
-export CONTAINER_REGISTRY_PASSWORD=
+export CONTAINER_REGISTRY_NAME=blikkpettercr
+export CONTAINER_REGISTRY_URL=blikkpettercr.azurecr.io
+export CONTAINER_REGISTRY_PASSWORD=<REPLACE-VALUE>
 export APPLICATION_NAME=identity-test
 export IMAGE_TAG="${CURRENT_BRANCH}-${CURRENT_COMMIT}-${CURRENT_TIMESTAMP}"
-export RESOURCE_GROUP_NAME=
-export WEB_APP_NAME=
+export RESOURCE_GROUP_NAME=petter-managed-identity-rg1ce029ef
+export WEB_APP_NAME=petter-managed-identity-app63fdea6e
 export SLOT_NAME=staging
 ############################################
 # Configure docker to use buildx to build multi-arch images

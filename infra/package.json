@@ -5,7 +5,9 @@
         "@types/node": "^18"
     },
     "dependencies": {
+        "@pulumi/azure-native": "^2.0.0",
+        "@pulumi/azuread": "^5.47.2",
         "@pulumi/pulumi": "^3.0.0",
-        "@pulumi/azure-native": "^2.0.0"
+        "@pulumiverse/mssql": "^0.0.8"
     }
 }
